@@ -1,10 +1,12 @@
 package cinema;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Cinema {
-
+    static int crrentIncome =0;
+    static int numOfPurchasedTickets=0;
     public static void main(String[] args) {
         // Write your code here
         Scanner scanner = new Scanner(System.in);
@@ -23,6 +25,7 @@ public class Cinema {
         while(!exit) {
             System.out.println("\n1. Show the seats" +
                     "\n2. Buy a ticket" +
+                    "\n3. Statistics" +
                     "\n0. Exit");
             int action = scanner.nextInt();
             switch (action) {
@@ -30,7 +33,11 @@ public class Cinema {
                     showCinemaRoomWithRowsCols(seatsArray);
                     break;
                 case 2:
-                    System.out.println("Ticket price: $"+getTicketPrice(seatsArray,scanner));
+                    int ticket = getTicketPrice(seatsArray,scanner);
+                    System.out.println(ticket>0?"Ticket price: $"+ticket: "That ticket has already been purchased!");
+                    break;
+                case 3:
+                    getStatistics(rows, cols);
                     break;
                 case 0:
                     exit = true;
@@ -44,26 +51,55 @@ public class Cinema {
 //
 //        showCinemaRoomWithRowsCols(rows,cols,chosenRow,chosenCol);
     }
+
+    private static void getStatistics(int rows, int cols) {
+        System.out.println("Number of purchased tickets: "+ numOfPurchasedTickets);
+//                    System.out.println("Percentage: "+ new DecimalFormat("0.00").
+//                            format((  numOfPurchasedTickets)/ (double rows*cols) *100);
+        System.out.println("Percentage: "+
+                new DecimalFormat("0.00").
+                 format(((double) numOfPurchasedTickets /(double) (rows * cols) )* 100)+"%");
+        System.out.println("Current income: $"+ crrentIncome);
+        System.out.println("Total income: $"+calculateIncome(rows, cols));
+    }
+
     private static int getTicketPrice(char[][] seatsArray ,Scanner scanner) {
         int chosenTicketPrice = 0;
-        System.out.println("Enter a row number:");
-        int chosenRow = scanner.nextInt();
-        System.out.println("Enter a seat number in that row:");
-        int chosenCol = scanner.nextInt();
+        boolean correctSeatNumberEntered = false;
+        int chosenRow=0;
+        int chosenCol=0;
+        while(!correctSeatNumberEntered) {
+            System.out.println("Enter a row number:");
+             chosenRow = scanner.nextInt();
+            System.out.println("Enter a seat number in that row:");
+            chosenCol = scanner.nextInt();
+            if(chosenRow >seatsArray.length || chosenCol >seatsArray[0].length){
+                System.out.println("Wrong input!");
+            }else
+            if (seatsArray[chosenRow - 1][chosenCol - 1] == 'S') {
+                seatsArray[chosenRow - 1][chosenCol - 1] = 'B';
+                correctSeatNumberEntered =true;
+            } else {
+                System.out.println("That ticket has already been purchased!");
 
-        seatsArray[chosenRow-1][chosenCol-1] = 'B';
+            }
+        }
+        numOfPurchasedTickets += 1;
+
         int totalSeats = seatsArray.length * seatsArray[0].length;
         final int regularPrice =10;
         final int largeRoomPrice =8;
         if(totalSeats <=60){
-            return regularPrice;
+            chosenTicketPrice = regularPrice;
         }else {
             if(chosenRow <= seatsArray.length / 2){
-                return regularPrice;
+                chosenTicketPrice=regularPrice;
             } else {
-                return largeRoomPrice;
+                chosenTicketPrice=largeRoomPrice;
             }
         }
+        crrentIncome += chosenTicketPrice;
+        return chosenTicketPrice;
 
     }
     private static int  calculateIncome(int rows, int cols) {
